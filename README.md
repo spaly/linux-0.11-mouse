@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # linux-0.11 (more syscalls)
 一个扩充了一些系统调用的linux 0.11
 
@@ -18,3 +19,7 @@
 
 ## v0.4.1
 添加了部分注释
+=======
+# linux-0.11-mouse
+linux-0.11-mouse
+>>>>>>> fb644e2bf9024d61031246e527020c2d884be8fb
