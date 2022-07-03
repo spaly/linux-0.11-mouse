@@ -153,6 +153,10 @@
 #define __NR_munmap	93
 #define __NR_clone	94
 
+#define __NR_init_graphics 95
+#define __NR_get_message 96
+#define __NR_repaint 97
+
 #define _syscall0(type,name) \
 type name(void) \
 { \
@@ -282,6 +286,10 @@ int pipe2(void);
 int mmap(void);
 int munmap(void);
 int clone(void);
+
+int init_graphics(void);
+int get_message(void);
+int repaint(int x,int y,int h);
 
 #define __always_inline inline __attribute__((always_inline))
 

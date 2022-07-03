@@ -22,6 +22,7 @@
  */
  
 __always_inline _syscall0(int,fork)
+__always_inline _syscall0(int,init_graphics)
 __always_inline _syscall0(int,pause)
 __always_inline _syscall1(int,setup,void *,BIOS)
 __always_inline _syscall0(int,sync)
@@ -139,6 +140,7 @@ void main(void)		/* This really IS void, no error here. */
 	if (!fork()) {		/* we count on this going ok */
 		init();
 	}
+	init_graphics();
 /*
  *   NOTE!!   For any other task 'pause()' would mean we have to get a
  * signal to awaken, but task0 is the sole exception (see 'schedule()')
