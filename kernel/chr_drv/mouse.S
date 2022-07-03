@@ -18,32 +18,19 @@ mouse_interrupt:
 
 // eax store mouse data ,put into stack for readmouse's params	
 	
-xor %eax,%eax
+	xor %eax,%eax
 	inb $0x60,%al	
 	pushl %eax
 	call readmouse
-	addl $4,%esp
-xor %eax,%eax
-	inb $0x60,%al	
-	pushl %eax
-	call readmouse
-	addl $4,%esp
+	addl $4,%esp 
 
-xor %eax,%eax
-	inb $0x60,%al	
-	pushl %eax
-	call readmouse
-	addl $4,%esp
-xor %eax,%eax
-	inb $0x60,%al	
-	pushl %eax
-	call readmouse
-	addl $4,%esp
-
-	// 3*EOI
-	movb $0x20,%al
+	movb $0x20,%al 
 	outb %al,$0xA0 
-	outb %al,$0x20
+	outb %al,$0x20 
+
+//8259A 操作命令字 EOI
+//向 8259A 从片发送 EOI
+//向 8259A 主片发送 EOI
 
 	//pop %es
 	pop %ds

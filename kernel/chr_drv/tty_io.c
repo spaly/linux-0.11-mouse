@@ -347,3 +347,56 @@ void do_tty_interrupt(int tty)
 void chr_dev_init(void)
 {
 }
+//
+int volatile jumpp;
+static unsigned char mouse_input_count=0; //记录鼠标输入的第几个字节
+static unsigned char mouse_left_down; //鼠标左键按下
+static unsigned char mouse_right_down; //鼠标右键按下
+static unsigned char mouse_left_move; //向左移动
+static unsigned char mouse_down_move; //向下移动
+static int mouse_x_position=30;
+static int mouse_y_position=30;
+
+void readmouse(int mousecode){
+	printk("%d",mouse_input_count);
+	
+	//0xFA是i8042鼠标命令的成功响应的ACK字节，应舍弃该字节，并设置重置条件
+	if (mousecode==0xFA || mouse_input_count==4){
+		mouse_input_count=1;
+		return ;
+	}
+
+	switch(mouse_input_count){
+		case 1:{
+			mouse_left_down=(mousecode&0x01)==0x01;
+			mouse_right_down=(mousecode&0x02)==0x02;
+			mouse_left_move=(mousecode&0x10)==0x10;
+			mouse_down_move=(mousecode&0x20)==0x20;
+			//printk("%d %d %d %d\n",mouse_left_down,mouse_right_down,mouse_left_move,mouse_down_move);
+			mouse_input_count++;
+			break;
+		}
+		case 2: //计算x轴上位置
+			//8位负数补码变32位
+			if (mouse_left_move) mouse_x_position +=(int)(0xFFFFFF00|mousecode);
+			if (mouse_x_position>100) mouse_x_position=100;
+			if (mouse_x_position<0) mouse_x_position=0;
+			mouse_input_count++;
+			break;
+		case 3: //y轴上位置
+			//jumpp=33;
+			if(mouse_down_move) mouse_y_position +=(int)(0xFFFFFF00|mousecode);
+			if(mouse_y_position>100) mouse_y_position=100;
+			if(mouse_y_position<0) mouse_y_position=0;
+			mouse_input_count++;
+			break;
+		default: //滚轮暂时不做
+			jumpp=jumpp;
+			break;
+	}
+}
+
+void tt(){
+	jumpp=33;
+	return ;
+}
