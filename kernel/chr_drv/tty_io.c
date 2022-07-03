@@ -356,12 +356,12 @@ static unsigned char mouse_left_move; //向左移动
 static unsigned char mouse_down_move; //向下移动
 static int mouse_x_position=30;
 static int mouse_y_position=30;
-
+int cnt;
 void readmouse(int mousecode){
-	printk("%d",mouse_input_count);
-	
+	//printk("%d",mouse_input_count);
+	//printk("%x ",mousecode);
 	//0xFA是i8042鼠标命令的成功响应的ACK字节，应舍弃该字节，并设置重置条件
-	if (mousecode==0xFA || mouse_input_count==4){
+	if (mousecode==0xFA){
 		mouse_input_count=1;
 		return ;
 	}
@@ -373,6 +373,7 @@ void readmouse(int mousecode){
 			mouse_left_move=(mousecode&0x10)==0x10;
 			mouse_down_move=(mousecode&0x20)==0x20;
 			//printk("%d %d %d %d\n",mouse_left_down,mouse_right_down,mouse_left_move,mouse_down_move);
+			//++cnt; printk("%d ",cnt);
 			mouse_input_count++;
 			break;
 		}
@@ -388,11 +389,8 @@ void readmouse(int mousecode){
 			if(mouse_down_move) mouse_y_position +=(int)(0xFFFFFF00|mousecode);
 			if(mouse_y_position>100) mouse_y_position=100;
 			if(mouse_y_position<0) mouse_y_position=0;
-			mouse_input_count++;
-			break;
-		default: //滚轮暂时不做
-			jumpp=jumpp;
-			break;
+			mouse_input_count=1;
+			break; //默认是二维鼠标，应该按3个一组处理
 	}
 }
 
