@@ -54,7 +54,10 @@
 #define NPAR 16
 
 extern void keyboard_interrupt(void);
+<<<<<<< HEAD
+=======
 extern void mouse_interrupt(void); //
+>>>>>>> 050f6f7d1bf5d71774487b5aab969cf5690035e7
 
 static unsigned char	video_type;		/* Type of display being used	*/
 static unsigned long	video_num_columns;	/* Number of text columns	*/
@@ -681,6 +684,9 @@ void con_init(void)
 	bottom	= video_num_lines;
 
 	gotoxy(ORIG_X,ORIG_Y);
+<<<<<<< HEAD
+	set_trap_gate(0x21,&keyboard_interrupt);
+=======
 
 	outb_p(0xA8,0x64); //允许鼠标操作
 	outb_p(0xD4,0x64); //给 0x64 端口发送 0xD4，表示接下来给 0x60 的命令是给鼠标的
@@ -698,6 +704,7 @@ void con_init(void)
 	outb_p(inb_p(0x21)&0xF9,0x21);
 	outb_p(inb_p(0xA1)&0xEF,0xA1);
 
+>>>>>>> 050f6f7d1bf5d71774487b5aab969cf5690035e7
 	outb_p(inb_p(0x21)&0xfd,0x21);
 	a=inb_p(0x61);
 	outb_p(a|0x80,0x61);

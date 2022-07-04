@@ -347,6 +347,8 @@ void do_tty_interrupt(int tty)
 void chr_dev_init(void)
 {
 }
+<<<<<<< HEAD
+=======
 //
 static unsigned char mouse_input_count=0; //记录鼠标输入的第几个字节
 static unsigned char mouse_left_down; //鼠标左键按下
@@ -401,3 +403,12 @@ void readmouse(int mousecode){
 			break; //没有处理滚轮,二维鼠标按3个一组处理
 	}
 }
+<<<<<<< HEAD
+=======
+
+void tt(){
+	jumpp=33;
+	return ;
+}
+>>>>>>> 050f6f7d1bf5d71774487b5aab969cf5690035e7
+>>>>>>> 17fa2decc7fd41f240ac36e7928832e411d7e1cd

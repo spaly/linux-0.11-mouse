@@ -19,7 +19,11 @@
  *
  * Also corrected some "invalidate()"s - I wasn't doing enough of them.
  */
+<<<<<<< HEAD
+#include <sys/stat.h>
+=======
 
+>>>>>>> 050f6f7d1bf5d71774487b5aab969cf5690035e7
 #include <signal.h>
 #include <asm/system.h>
 #include <linux/sched.h>
@@ -47,7 +51,11 @@ __asm__("movl %%eax,%%cr3"::"a" (0))
 #define CODE_SPACE(addr) ((((addr)+4095)&~4095) < \
 current->start_code + current->end_code)
 
+<<<<<<< HEAD
+long HIGH_MEMORY = 0;
+=======
 static long HIGH_MEMORY = 0;
+>>>>>>> 050f6f7d1bf5d71774487b5aab969cf5690035e7
 
 #define copy_page(from,to) \
 __asm__("cld ; rep ; movsl"::"S" (from),"D" (to),"c" (1024))
@@ -473,3 +481,257 @@ void calc_mem(void)
 		}
 	}
 }
+<<<<<<< HEAD
+
+
+#define bitop(name,op) \
+static inline int name(char * addr,unsigned int nr) \
+{ \
+int __res; \
+__asm__ __volatile__("bt" op " %1,%2; adcl $0,%0" \
+:"=g" (__res) \
+:"r" (nr),"m" (*(addr)),"0" (0)); \
+return __res; \
+}
+
+bitop(bit,"")
+bitop(setbit,"s")
+bitop(clrbit,"r")
+static struct swap_info_struct {
+	unsigned long flags;
+	struct inode * swap_file;
+	unsigned int swap_device;
+	unsigned char * swap_map;
+	char * swap_lockmap;
+	int lowest_bit;
+	int highest_bit;
+} swap_info[8];
+#define SWP_USED	1
+static struct task_struct* tmpp[35];
+void swap_free(unsigned int nr){
+	struct swap_info_struct * p;
+	if (!nr)
+		return;
+	printk("!!\n");
+	/*
+	if ((nr >> 24) >= nr_swapfiles) {
+		printk("Trying to free nonexistent swap-page\n");
+		return;
+	}*/
+	p = (nr >> 24) + swap_info;
+	nr &= 0x00ffffff;
+	if (nr >= 4096) {
+		printk("swap_free: weirness\n");
+		return;
+	}
+	if (!(p->flags & SWP_USED)) {
+		printk("Trying to free swap from unused swap-device\n");
+		return;
+	}
+	tmpp[0]=current; int l=0,i;
+	while (setbit(p->swap_lockmap,nr)){
+		printk("#%d ",p->swap_lockmap);
+		tmpp[++l]=tmpp[0],sleep_on(&tmpp[0]);
+	}
+	if (nr < p->lowest_bit)
+		p->lowest_bit = nr;
+	if (nr > p->highest_bit)
+		p->highest_bit = nr;
+	if (!p->swap_map[nr])
+		printk("swap_free: swap-space map bad (page %d)\n",nr);
+	else
+		p->swap_map[nr]--;
+	if (!clrbit(p->swap_lockmap,nr))
+		printk("swap_free: lock already cleared\n");
+	for(i=0;i<=l;++i) wake_up(&tmpp[i]);
+}
+
+/*
+ * maps a range of physical memory into the requested pages. the old
+ * mappings are removed. any references to nonexistent pages results
+ * in null mappings (currently treated as "copy-on-access")
+ *
+ * permiss is encoded as cxwr (copy,exec,write,read) where copy modifies
+ * the behavior of write to be copy-on-write.
+ *
+ * due to current limitations, we actually have the following
+ *		on		off
+ * read:	yes		yes
+ * write/copy:	yes/copy	copy/copy
+ * exec:	yes		yes
+ */
+#define PAGE_ACCESSED 0x20
+#define MAP_PAGE_RESERVED (1<<15)
+int remap_page_range(unsigned long from, unsigned long to, unsigned long size,
+		 int permiss)
+{
+	unsigned long *page_table, *dir;
+	unsigned long poff, pcnt;
+	unsigned long page;
+	printk("???\n");
+	if ((from & 0xfff) || (to & 0xfff))
+		panic("remap_page_range called with wrong alignment");
+	dir = (unsigned long *) (current->tss.cr3 + ((from >> 20) & 0xffc));
+	size = (size + 0xfff) >> 12;
+	poff = (from >> 12) & 0x3ff;
+	if ((pcnt = 1024 - poff) > size)
+		pcnt = size;
+	printk("^%d\n",size);
+	while (size > 0) {
+		printk("^%d\n",size);
+		if (!(1 & *dir)) {
+			if (!(page_table = (unsigned long *)get_free_page())) { //?
+				invalidate();
+				return -1;
+			}
+			*dir++ = ((unsigned long) page_table) | PAGE_ACCESSED | 7; //?
+		}
+		else
+			page_table = (unsigned long *)(0xfffff000 & *dir++);
+		if (poff) {
+			page_table += poff;
+			poff = 0;
+		}
+
+		for (size -= pcnt; pcnt-- ;) {
+			int mask = 4;
+			if (permiss & 1)
+				mask |= 1;
+			if (permiss & 2) {
+				if (permiss & 8)
+					mask |= 1;
+				else
+					mask |= 3;
+			}
+			if (permiss & 4)
+				mask |= 1;
+
+			if ((page = *page_table) != 0) {
+				*page_table = 0;
+				--current->rss;
+				if (1 & page)
+					free_page(0xfffff000 & page);
+				else
+					swap_free(page >> 1);
+			}
+
+			
+			if (mask == 4 || to >= HIGH_MEMORY || !mem_map[MAP_NR(to)])
+				*page_table++ = 0;	//not present 
+			else {
+				++current->rss;
+				*page_table++ = (to | mask);
+				if (!(mem_map[MAP_NR(to)] & MAP_PAGE_RESERVED))
+					mem_map[MAP_NR(to)]++;
+			}
+			to += PAGE_SIZE;
+		}
+		pcnt = (size > 1024 ? 1024 : size);
+	}
+	invalidate();
+	return 0;
+}
+
+
+/*
+ * description of effects of mapping type and prot in current implementation.
+ * this is due to the current handling of page faults in memory.c. the expected
+ * behavior is in parens:
+ *
+ * map_type	prot
+ *		PROT_NONE	PROT_READ	PROT_WRITE	PROT_EXEC
+ * MAP_SHARED	r: (no) yes	r: (yes) yes	r: (no) yes	r: (no) no
+ *		w: (no) yes	w: (no) copy	w: (yes) yes	w: (no) no
+ *		x: (no) no	x: (no) no	x: (no) no	x: (yes) no
+ *		
+ * MAP_PRIVATE	r: (no) yes	r: (yes) yes	r: (no) yes	r: (no) no
+ *		w: (no) copy	w: (no) copy	w: (copy) copy	w: (no) no
+ *		x: (no) no	x: (no) no	x: (no) no	x: (yes) no
+ *
+ * the permissions are encoded as cxwr (copy,exec,write,read)
+ */
+#define MAP_TYPE         0xf       /* Mask for type of mapping */
+#define PROT_READ	1		/* page can be read */
+#define PROT_WRITE	2		/* page can be written */
+#define PROT_EXEC	4		/* page can be executed */
+#define PROT_NONE	0		/* page can not be accessed */
+#define MAP_FILE	0
+#define MAP_SHARED	1		/* Share changes */
+#define MAP_PRIVATE	2		/* Changes are private */
+#define MTYP(T) ((T) & MAP_TYPE)
+#define PREAD(T,P) (((P) & PROT_READ) ? 1 : 0)
+#define PWRITE(T,P) (((P) & PROT_WRITE) ? (MTYP(T) == MAP_SHARED ? 2 : 10) : 0)
+#define PEXEC(T,P) (((P) & PROT_EXEC) ? 4 : 0)
+#define PERMISS(T,P) (PREAD(T,P)|PWRITE(T,P)|PEXEC(T,P))
+long mmap(void *start, size_t len, int prot, int flags,
+int fd, off_t off){
+	printk("~~~\n");
+	flags=1; fd=3; off=0;
+	unsigned long base,addr=(unsigned long*)start;
+	unsigned long limit;
+	struct file *file;
+	struct m_inode *inode;
+	file = current->filp[fd]; inode = file->f_inode;
+
+	/*
+	 * do simple checking here so the lower-level routines won't have
+	 * to. we assume access permissions have been handled by the open
+	 * of the memory object, so we don't do any here.
+	 */
+	/*
+	switch(flags){
+		case MAP_SHARED:
+			if ((prot & PROT_WRITE) && !(file->f_mode & 2)){
+				printk("  %d %d %d\n",prot,PROT_WRITE,file->f_mode);
+				return -1;
+			}
+			//fall through
+		case MAP_PRIVATE:{
+			if (!(file->f_mode & 1))
+				return -1;
+			break;
+		}
+		default:
+			return -1;
+	}
+	*/
+	/*
+	 * obtain the address to map to. we verify (or select) it and ensure
+	 * that it represents a valid section of the address space. we assume
+	 * that if PROT_EXEC is specified this should be in the code segment.
+	 */
+	 //0.11
+	if (prot&PROT_EXEC) //cs
+		base=get_base(current->ldt[1]),limit=get_limit(0x0f);
+	else //ds
+		base=get_base(current->ldt[2]),limit=get_limit(0x17);
+	if (addr+len>limit)
+			return -1; // fang bu xia
+	/*
+	 * determine the object being mapped and call the appropriate
+	 * specific mapper. the address has already been validated, but
+	 * not unmapped
+	 */
+	 //0.11
+	printk("$%d %d %d\n",len,HIGH_MEMORY,base);
+	if (len>HIGH_MEMORY||off>HIGH_MEMORY-len) /* avoid overflow */
+		return -1;
+	addr+=base;
+	if (remap_page_range(addr,off,len,PERMISS(flags,prot)))
+		return -1;
+	
+	if ((long)addr>0) addr-=base;
+	return addr;
+}
+int munmap(void * start, size_t len){
+    unsigned long base, limit,addr=(unsigned long *)start;
+	base=get_base(current->ldt[2]);	/* map into ds */
+	limit=get_limit(0x17);		/* ds limit */
+
+	if (addr+len>limit) return -1;
+	if (free_page_tables(base+addr,len)) //unmap_page_range?
+		return -1; /* should never happen */
+	return 0;
+}
+=======
+>>>>>>> 050f6f7d1bf5d71774487b5aab969cf5690035e7

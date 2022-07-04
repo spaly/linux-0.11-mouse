@@ -174,11 +174,14 @@ extern void post_message(int type);
 #define __NR_munmap	93
 #define __NR_clone	94
 
+<<<<<<< HEAD
+=======
 #define __NR_init_graphics 95
 #define __NR_get_message 96
 #define __NR_repaint 97
 #define __NR_timer_create 98
 
+>>>>>>> 050f6f7d1bf5d71774487b5aab969cf5690035e7
 #define _syscall0(type,name) \
 type name(void) \
 { \
@@ -305,14 +308,30 @@ count);
 int sleep(unsigned int seconds);
 long getcwd(char * buf, size_t size);
 int pipe2(void);
+<<<<<<< HEAD
+
+long mmap(void *start, size_t len, int prot, int flags,
+int fd, off_t off);
+int munmap(void * start, size_t len);
+
+int clone(void);
+
+=======
 int mmap(void);
 int munmap(void);
 int clone(void);
 
 int init_graphics(void);
+<<<<<<< HEAD
 int get_message(int *msg);
 int repaint(int x,int y,char c);
 int timer_create(int ms,int type);
+=======
+int get_message(void);
+int repaint(int x,int y,int h);
+
+>>>>>>> 050f6f7d1bf5d71774487b5aab969cf5690035e7
+>>>>>>> 17fa2decc7fd41f240ac36e7928832e411d7e1cd
 #define __always_inline inline __attribute__((always_inline))
 
 #endif

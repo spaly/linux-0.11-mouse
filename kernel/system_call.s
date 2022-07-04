@@ -58,7 +58,15 @@ sa_mask = 4
 sa_flags = 8
 sa_restorer = 12
 
+<<<<<<< HEAD
 nr_system_calls = 99  /* 72 */
+=======
+<<<<<<< HEAD
+nr_system_calls = 95  /* 72 */
+=======
+nr_system_calls = 98  /* 72 */
+>>>>>>> 050f6f7d1bf5d71774487b5aab969cf5690035e7
+>>>>>>> 17fa2decc7fd41f240ac36e7928832e411d7e1cd
 
 /*
  * Ok, I get parallel printer interrupts while using the floppy for some
