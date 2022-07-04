@@ -20,7 +20,9 @@
  * won't be any messing with the stack from main(), but we define
  * some others too.
  */
- 
+
+//__always_inline _syscall2(int,timer_create,int,ms,int,type)
+__always_inline _syscall1(int,get_message,int *,msg)
 __always_inline _syscall0(int,fork)
 __always_inline _syscall0(int,init_graphics)
 __always_inline _syscall0(int,pause)
@@ -95,7 +97,12 @@ static void time_init(void)
 	time.tm_mon--;
 	startup_time = kernel_mktime(&time);
 }
-
+void message_init(){
+	timer_head=NULL; timer_tail=NULL;
+	ms_head=ms_tail=0;
+	printk("message init finished\n");
+	return;
+}
 static long memory_end = 0;
 static long buffer_memory_end = 0;
 static long main_memory_start = 0;
@@ -135,12 +142,13 @@ void main(void)		/* This really IS void, no error here. */
 	buffer_init(buffer_memory_end);
 	hd_init();
 	floppy_init();
+	//message_init();
 	sti();
 	move_to_user_mode();
 	if (!fork()) {		/* we count on this going ok */
 		init();
 	}
-	init_graphics();
+	//init_graphics();
 /*
  *   NOTE!!   For any other task 'pause()' would mean we have to get a
  * signal to awaken, but task0 is the sole exception (see 'schedule()')
@@ -213,6 +221,6 @@ void init(void)
 
 void print_nr(int sid)
 {
-	if (sid > 86)
-		printk(" --syscall: sid=%d, pid=%d\n", sid, current->pid);
+	//if (sid > 86)
+	//	printk(" --syscall: sid=%d, pid=%d\n", sid, current->pid);
 }

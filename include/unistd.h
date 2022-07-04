@@ -55,6 +55,27 @@
 #include <sys/utsname.h>
 #include <utime.h>
 
+#define MESSAGE_MOUSE 1
+#define MESSAGE_TIME  2
+#define MS_SIZ	1024
+
+typedef struct {
+    long jiffies;
+    int type;
+    long init_jiffies;
+    int pid;
+    struct wjy_timer *next;
+}wjy_timer;
+wjy_timer *timer_head, *timer_tail;
+
+unsigned int ms_head, ms_tail;
+typedef struct{
+	int index, pid;
+}message;
+message msqueue[MS_SIZ];
+
+extern void post_message(int type);
+
 #ifdef __LIBRARY__
 
 #define __NR_setup	0	/* used only by init, to get system going */
@@ -156,6 +177,7 @@
 #define __NR_init_graphics 95
 #define __NR_get_message 96
 #define __NR_repaint 97
+#define __NR_timer_create 98
 
 #define _syscall0(type,name) \
 type name(void) \
@@ -288,9 +310,10 @@ int munmap(void);
 int clone(void);
 
 int init_graphics(void);
-int get_message(void);
-int repaint(int x,int y,int h);
-
+int get_message(int *msg);
+int repaint(int x,int y,char c);
+int timer_create(int ms,int type);
 #define __always_inline inline __attribute__((always_inline))
 
 #endif
+

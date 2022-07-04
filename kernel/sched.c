@@ -17,7 +17,7 @@
 #include <asm/system.h>
 #include <asm/io.h>
 #include <asm/segment.h>
-
+#include <unistd.h>
 #include <signal.h>
 
 #define _S(nr) (1<<((nr)-1))
@@ -307,6 +307,25 @@ void do_timer(long cpl)
 	extern int beepcount;
 	extern void sysbeepstop(void);
 
+	wjy_timer *t=timer_head;
+	wjy_timer *pre=NULL;
+
+	while(t){
+		wjy_timer *temp=t->next;
+		t->jiffies--;
+		if(t->jiffies==0){
+			post_message(MESSAGE_TIME);
+			if(t->type==0)
+				t->jiffies = t->init_jiffies;
+			else{
+				if (pre) pre->next=t->next;
+				else timer_head=t->next;
+				free(t);
+			}
+		}
+		t=temp;
+	}
+	
 	if (beepcount)
 		if (!--beepcount)
 			sysbeepstop();

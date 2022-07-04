@@ -1,17 +1,17 @@
 #include <linux/kernel.h>
 #include <asm/io.h>
 #include "linux/tty.h"
+#include <unistd.h>
 #define memstart 0xA0000
 #define memsize 64000
-#define cursor_side 3
+//#define cursor_side 3
 #define width 320 //分辨率
 #define height 200
-#define barrier_width 10
-int volatile jumpp;
+//#define barrier_width 10
+
 int ff=0;
 int sys_init_graphics(){
-    int i,j,x,y; printk("##\n");
-    char *p=0xA0000;
+    
 if (ff==0){
     //数据放入显存片
     outb(0x05,0x3CE);
@@ -45,46 +45,27 @@ if (ff==0){
     outb(0x00,0x3D5);//Start Address=0xA0000
     ff=1;
 }
-    //绘制鼠标
-    p=memstart;
+    int i,j,x,y;
+    char *p=memstart;
     for(i=0;i<memsize;i++) *p++=3; //背景蓝绿
     //3-blue 4-red 12-purple
+    /*
     x=20; y=10;
     for(i=x-cursor_side;i<=x+cursor_side;++i)
         for(j=y-cursor_side;j<=y+cursor_side;++j){
             p=(char *) memstart+j*width+i;
             *p=12; //鼠标红色
-        }
+        }*/
     return 0;
 }
 
-int sys_get_message(){
-	if(jumpp>0) --jumpp;
-	return jumpp;
-}
-
-int sys_repaint(int x,int y,int h){
-	int i,j,w;
+int sys_repaint(int x,int y,char c){
+	int i,j,lx,rx,ly,ry;
+	lx=x>>9; rx=x&511; if (rx>width) rx=width;
+	ly=y>>9; ry=y&511; if (ry>height) ry=height;
 	char *p;
-	i=x; j=y; p=0xA0000; w=barrier_width;
-	if (i+w>=320||i<20) return 0;
-	if (i==33||j==33){
-        p=0xA0000;
-	    for (i=0;i<memsize;++i) *p++=3;
-	    return 0;
-	}
-	else if(i==44||j==44){
-        p=0xA0000;
-	    for(i=0;i<memsize;++i) *p++=4;
-	    return 0;
-	}
-    else{
-	    for(i=x;i<=x+w;++i){	
-		    for(j=y;j<=y+h;++j){
-			    p=0xA0000+j*320+i;
-			    *p=12;
-		    }
-		}
-    }
-    return 0;
+	for(i=lx;i<=rx;++i)
+		for(j=ly;j<=ry; ++j)
+			p=(char*)memstart+j*width+i,*p=c;
+	return 0;
 }
