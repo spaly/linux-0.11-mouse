@@ -104,7 +104,10 @@ struct task_struct {
 	struct desc_struct ldt[3];
 /* tss for this task */
 	struct tss_struct tss;
+<<<<<<< HEAD
 	int rss; //?
+=======
+>>>>>>> 050f6f7d1bf5d71774487b5aab969cf5690035e7
 };
 
 /*

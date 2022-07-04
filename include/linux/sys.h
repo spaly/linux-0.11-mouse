@@ -99,6 +99,13 @@ extern int sys_mmap();
 extern int sys_munmap();
 extern int sys_clone();
 
+<<<<<<< HEAD
+=======
+extern int sys_init_graphics();
+extern int sys_get_message();
+extern int sys_repaint();
+
+>>>>>>> 050f6f7d1bf5d71774487b5aab969cf5690035e7
 fn_ptr sys_call_table[] = { sys_setup, sys_exit, sys_fork, sys_read,
 sys_write, sys_open, sys_close, sys_waitpid, sys_creat, sys_link,
 sys_unlink, sys_execve, sys_chdir, sys_time, sys_mknod, sys_chmod,
@@ -116,7 +123,12 @@ sys_setrlimit, sys_getrlimit, sys_getrusage, sys_gettimeofday,
 sys_settimeofday, sys_getgroups, sys_setgroups, sys_select, sys_symlink,
 sys_lstat, sys_readlink, sys_uselib, sys_execve2,
 sys_getdents,sys_pipe2,sys_sleep,sys_getcwd,
+<<<<<<< HEAD
 sys_mmap,sys_munmap,sys_clone};
+=======
+sys_mmap,sys_munmap,sys_clone,
+sys_init_graphics ,sys_get_message,sys_repaint};
+>>>>>>> 050f6f7d1bf5d71774487b5aab969cf5690035e7
 
 /* So we don't have to do any more manual updating.... */
 int NR_syscalls = sizeof(sys_call_table)/sizeof(fn_ptr);

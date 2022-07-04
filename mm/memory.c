@@ -19,7 +19,11 @@
  *
  * Also corrected some "invalidate()"s - I wasn't doing enough of them.
  */
+<<<<<<< HEAD
 #include <sys/stat.h>
+=======
+
+>>>>>>> 050f6f7d1bf5d71774487b5aab969cf5690035e7
 #include <signal.h>
 #include <asm/system.h>
 #include <linux/sched.h>
@@ -47,7 +51,11 @@ __asm__("movl %%eax,%%cr3"::"a" (0))
 #define CODE_SPACE(addr) ((((addr)+4095)&~4095) < \
 current->start_code + current->end_code)
 
+<<<<<<< HEAD
 long HIGH_MEMORY = 0;
+=======
+static long HIGH_MEMORY = 0;
+>>>>>>> 050f6f7d1bf5d71774487b5aab969cf5690035e7
 
 #define copy_page(from,to) \
 __asm__("cld ; rep ; movsl"::"S" (from),"D" (to),"c" (1024))
@@ -473,6 +481,7 @@ void calc_mem(void)
 		}
 	}
 }
+<<<<<<< HEAD
 
 
 #define bitop(name,op) \
@@ -724,3 +733,5 @@ int munmap(void * start, size_t len){
 		return -1; /* should never happen */
 	return 0;
 }
+=======
+>>>>>>> 050f6f7d1bf5d71774487b5aab969cf5690035e7
