@@ -279,8 +279,11 @@ count);
 int sleep(unsigned int seconds);
 long getcwd(char * buf, size_t size);
 int pipe2(void);
-int mmap(void);
-int munmap(void);
+
+long mmap(void *start, size_t len, int prot, int flags,
+int fd, off_t off);
+int munmap(void * start, size_t len);
+
 int clone(void);
 
 #define __always_inline inline __attribute__((always_inline))
