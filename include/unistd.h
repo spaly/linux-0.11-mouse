@@ -55,9 +55,8 @@
 #include <sys/utsname.h>
 #include <utime.h>
 
-#define MESSAGE_MOUSE 1
-#define MESSAGE_TIME  2
-#define MS_SIZ	1024
+#define MESSAGE_MOUSE 1 //flappybird中按下鼠标左键
+#define MESSAGE_TIME  2 //flappybird中时间+1
 
 typedef struct {
     long jiffies;
@@ -68,6 +67,7 @@ typedef struct {
 }wjy_timer;
 wjy_timer *timer_head, *timer_tail;
 
+#define MS_SIZ	1024
 unsigned int ms_head, ms_tail;
 typedef struct{
 	int index, pid;

@@ -25,23 +25,19 @@ int sys_get_message(int *msg){
 	return 0;
 }
 int sys_timer_create(int ms, int type){
-	int jiffies = ms / 10; //10msһ��ʱ��Ƭ
-	wjy_timer *t = (wjy_timer*)malloc(sizeof(wjy_timer));
-	t->init_jiffies = jiffies;
-	t->jiffies = jiffies;
-	t->pid = current->pid;
-	t->type = type;
-	t->next = timer_head;
-	timer_head = t;
+	int jiffies = ms/10; //一个时间片对应10ms
+	wjy_timer *t=(wjy_timer*)malloc(sizeof(wjy_timer));
+	t->init_jiffies=jiffies; t->jiffies=jiffies;
+	t->pid=current->pid; t->type=type;
+	t->next=timer_head; timer_head=t;
 	return 0;
 }
 void post_message(int from) {
-	if (ms_head - 1 != ms_tail) {
+	if (ms_head-1!=ms_tail) {
 		message msg;
-		msg.index = from;
-		msg.pid = current->pid;
-		msqueue[ms_tail] = msg;
-		ms_tail = (ms_tail + 1) % MS_SIZ;
+		msg.index=from; msg.pid=current->pid;
+		msqueue[ms_tail]=msg;
+		ms_tail=(ms_tail+1)%MS_SIZ;
 	}
 	return;
 }
@@ -54,17 +50,17 @@ struct linux_dirent{
 int sys_getdents(unsigned int fd, struct linux_dirent *dirp, unsigned int
 count){
 	if (!count) return -1;
-	struct m_inode *inode; //内存�?的i节点结构
+	struct m_inode *inode; //内存�?的i节点结构
 	struct buffer_head *bh; // 缓冲区头
 	inode=current->filp[fd]->f_inode;
 	bh=bread(inode->i_dev, inode->i_zone[0]);
 
 	struct linux_dirent myld;
 	int siz_dir=sizeof(struct dir_entry),siz_ld=sizeof(struct linux_dirent);
-	struct dir_entry *dir; //文件�?录项
+	struct dir_entry *dir; //文件�?录项
 	char *buf; int ans=0,k=0; //ans记录读取的字节数
 	for(; k<inode->i_size; k+=siz_dir){
-		dir=(struct dir_entry *)(bh->b_data+k); //数据块指�?+偏移�?
+		dir=(struct dir_entry *)(bh->b_data+k); //数据块指�?+偏移�?
 		if (dir->inode==0) continue; //节点为空
 		if (ans+siz_ld>=count) return 0; //dirp满了
 		
@@ -93,33 +89,33 @@ long sys_getcwd(char * buf, size_t size){
 	char ch[256]="",tmp[256]="";
 	int siz_dir=sizeof(struct dir_entry);
 
-	struct m_inode *xi=current->pwd,*fi; //xi�?当前�?录的i节点
-	if (xi==current->root) ch[0]="/",ch[1]=0; //特判已经�?根节点的情况
+	struct m_inode *xi=current->pwd,*fi; //xi�?当前�?录的i节点
+	if (xi==current->root) ch[0]="/",ch[1]=0; //特判已经�?根节点的情况
 	else{
 		int block;
 		if ( !(block=xi->i_zone[0]) )
 			return NULL;
-		if ( !(bh=bread(xi->i_dev,block)) ) //读取当前�?录的数据块内�?
+		if ( !(bh=bread(xi->i_dev,block)) ) //读取当前�?录的数据块内�?
 			return NULL;
 		
-		while(xi!=current->root){ //回溯到根�?录为�?
-			dir=(struct dir_entry *)(bh->b_data+siz_dir); //定位上一级目�?
-			fi=iget(xi->i_dev, dir->inode); //fi�?上一级目录的i节点
+		while(xi!=current->root){ //回溯到根�?录为�?
+			dir=(struct dir_entry *)(bh->b_data+siz_dir); //定位上一级目�?
+			fi=iget(xi->i_dev, dir->inode); //fi�?上一级目录的i节点
 			if ( !(block=fi->i_zone[0]) )
 				return NULL;
-			if ( !(bh=bread(fi->i_dev,block)) ) //读取上一级目录的数据块内�?
+			if ( !(bh=bread(fi->i_dev,block)) ) //读取上一级目录的数据块内�?
 				return NULL;
 			
 			int k=0;
-			for(; k<fi->i_size; k+=siz_dir){ //遍历上一级目录的�?录项
+			for(; k<fi->i_size; k+=siz_dir){ //遍历上一级目录的�?录项
 				fdir=(struct dir_entry *)(bh->b_data+k);
-				if (fdir->inode == xi->i_num){ //i节点号�?�上了，表示找到了当前节点�?�应的文件目录项
-					strcpy(tmp, "/"); strcat(tmp, fdir->name); //拼接�?录路径字符串
+				if (fdir->inode == xi->i_num){ //i节点号�?�上了，表示找到了当前节点�?�应的文件目录项
+					strcpy(tmp, "/"); strcat(tmp, fdir->name); //拼接�?录路径字符串
 					strcat(tmp, ch); strcpy(ch, tmp);
 					break;
 				}
 			}
-			xi=fi; //回溯到上一级目�?
+			xi=fi; //回溯到上一级目�?
 		}
 	}
 	int l=strlen(ch),i;

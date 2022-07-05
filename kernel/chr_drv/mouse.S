@@ -8,15 +8,11 @@ mouse_interrupt:
 	pushl %ecx
 	pushl %edx
 	push %ds
-	//push %es
-
-//prepare for call readmouse ,ds is in kernel
-//call tt
+	push %es
+	//éœ€è¦å‹æ ˆ%es
 	movl $0x10,%eax
 	mov %ax,%ds 
-	//mov %ax,%es
-
-// eax store mouse data ,put into stack for readmouse's params	
+	mov %ax,%es
 	
 	xor %eax,%eax
 	inb $0x60,%al	
@@ -27,12 +23,10 @@ mouse_interrupt:
 	movb $0x20,%al 
 	outb %al,$0xA0 
 	outb %al,$0x20 
-
-//8259A ²Ù×÷ÃüÁî×Ö EOI
-//Ïò 8259A ´ÓÆ¬·¢ËÍ EOI
-//Ïò 8259A Ö÷Æ¬·¢ËÍ EOI
-
-	//pop %es
+//8259A æ“ä½œå‘½ä»¤å­— EOI
+//å‘ 8259A ä»ç‰‡å‘é€ EOI
+//å‘ 8259A ä¸»ç‰‡å‘é€ EOI
+	pop %es
 	pop %ds
 	popl %edx
 	popl %ecx

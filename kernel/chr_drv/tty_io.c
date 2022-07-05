@@ -353,17 +353,12 @@ static unsigned char mouse_left_down; //鼠标左键按下
 static unsigned char mouse_right_down; //鼠标右键按下
 static unsigned char mouse_left_move; //左右移动
 static unsigned char mouse_down_move; //上下移动
-static int mouse_x_position=100;
-static int mouse_y_position=100;
-static int height=200,width=320;
-int cnt;
+static int mouse_x_position=100,mouse_y_position=100; //鼠标位置
+static int height=200,width=320; //屏幕大小
 void readmouse(int mousecode){
-	//printk("%d",mouse_input_count);
-	//printk("%x ",mousecode);
 	//0xFA是i8042鼠标命令的成功响应的ACK字节，应舍弃该字节，并设置重置条件
 	if (mousecode==0xFA){
-		mouse_input_count=1;
-		return ;
+		mouse_input_count=1;return ;
 	}
 	int dis;
 	switch(mouse_input_count){
@@ -372,14 +367,13 @@ void readmouse(int mousecode){
 			mouse_right_down=(mousecode&0x02)==0x02;
 			mouse_left_move=(mousecode&0x10)==0x10;
 			mouse_down_move=(mousecode&0x20)==0x20;
-			
 			if (mouse_left_down)
-				post_message(MESSAGE_MOUSE);
+				post_message(MESSAGE_MOUSE); //flappybird所需的传递鼠标左键按下信息
 			/*
+			// 这两行是测试代码
 			if (mouse_left_down|mouse_right_down|mouse_left_move|mouse_down_move)
 			printk("%d %d %d %d\n",mouse_left_down,mouse_right_down,mouse_left_move,mouse_down_move);
 			*/
-			//++cnt; printk("%d ",cnt);
 			mouse_input_count++;
 			break;
 		}

@@ -38,7 +38,7 @@ if (ff==0){
     outb(0x40,0x3D5);// DW=1
     outb(0x13,0x3D4);
     outb(0x28,0x3D5);// Offset=40
-    //»æÖÆÆÁÄ»
+    
     outb(0x0C,0x3D4);
     outb(0x00,0x3D5);
     outb(0x0D,0x3D4);
@@ -48,14 +48,6 @@ if (ff==0){
     int i,j,x,y;
     char *p=memstart;
     for(i=0;i<memsize;i++) *p++=3; //±³¾°À¶ÂÌ
-    //3-blue 4-red 12-purple
-    /*
-    x=20; y=10;
-    for(i=x-cursor_side;i<=x+cursor_side;++i)
-        for(j=y-cursor_side;j<=y+cursor_side;++j){
-            p=(char *) memstart+j*width+i;
-            *p=12; //Êó±êºìÉ«
-        }*/
     return 0;
 }
 

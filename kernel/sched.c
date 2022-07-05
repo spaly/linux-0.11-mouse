@@ -314,8 +314,8 @@ void do_timer(long cpl)
 		wjy_timer *temp=t->next;
 		t->jiffies--;
 		if(t->jiffies==0){
-			post_message(MESSAGE_TIME);
-			if(t->type==0)
+			post_message(MESSAGE_TIME); //传递刷新屏幕的信息
+			if (t->type==0)
 				t->jiffies = t->init_jiffies;
 			else{
 				if (pre) pre->next=t->next;
