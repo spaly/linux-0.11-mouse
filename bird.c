@@ -54,8 +54,7 @@ int obstacle_count;
 int get_stucked(int posx, int posy) {
     int pos, i, j;
     for (pos = 0; pos < obstacle_count; ++pos) {
-        if (posx - (BIRD_WIDTH / 2) > a[pos].xpos2) break;
-        if (posx + (BIRD_WIDTH / 2) < a[pos].xpos1) continue;
+        if (a[pos].xpos2<0) continue; if (a[pos].xpos1>MAX_X) break;
         if ((posx - (BIRD_WIDTH / 2) >= a[pos].xpos1 && posx - (BIRD_WIDTH / 2) <= a[pos].xpos2)
          || (posx + (BIRD_WIDTH / 2) >= a[pos].xpos1 && posx + (BIRD_WIDTH / 2) <= a[pos].xpos2)
          || (posx - (BIRD_WIDTH / 2) >= a[pos].xpos1 && posx + (BIRD_WIDTH / 2) <= a[pos].xpos2)) 
@@ -79,9 +78,9 @@ int main(){
     int speed,pos,i,j,*m,tmp;
     int now_x=50,now_y=100;
     int ok=0;
-    printf("Select your speed(300ms~3000ms): \n");
+    printf("Select your speed(150ms~1500ms): \n");
     scanf("%d",&speed);
-    if (speed<300) speed=300; if (speed>3000) speed=3000;
+    if (speed<150) speed=150; if (speed>1500) speed=1500;
 
     srand(time(NULL));
     obstacle_count=rand()%200+100;
@@ -123,28 +122,28 @@ int main(){
     paint(bird, 12);
 
     for (i=0;i<obstacle_count;++i) {paint(a[i],12);}
-    sleep(5);
+    sleep(2);
     timer_create(speed,0);
     while(1) {
         get_message(m);
         if (*m == -1) continue;
 
         if (*m == 1 || *m == 0) 
-            now_y -= 20;
+            now_y -= 10;
         if (*m == 2)
-            now_y += 20;
+            now_y += 10;
             
         paint(bird, 3);
         bird.ypos1 = now_y - (BIRD_HEIGHT / 2);
         bird.ypos2 = now_y + (BIRD_HEIGHT / 2);
         paint(bird, 12);
 
-        if (get_stucked(now_x, now_y)) { ok = 1; break; }
+        if (get_stucked(now_x, now_y)==1) { ok = 1; break; }
         if (now_y - (BIRD_HEIGHT / 2) < 0 || now_y + (BIRD_HEIGHT / 2) >= 200) { ok = 1; break; }
         for (i = 0; i < obstacle_count; ++i){
             paint(a[i], 3),
-            a[i].xpos1 -= 20, 
-            a[i].xpos2 -= 20, 
+            a[i].xpos1 -= 10, 
+            a[i].xpos2 -= 10, 
             paint(a[i], 12);
         }
     }
